@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.navigation"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.navigation"
@@ -38,6 +36,15 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    
+    // Retrofit & Gson
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    
+    // Glide (Gambar dari URL)
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

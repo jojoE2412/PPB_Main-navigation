@@ -1,7 +1,21 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.Navigation" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Warna Utama Mode Gelap -->
+        <item name="colorPrimary">#FFD54F</item>
+        <item name="colorOnPrimary">#000000</item>
+        
+        <!-- Latar Belakang & Permukaan Gelap -->
+        <item name="android:windowBackground">#121212</item>
+        <item name="colorSurface">#121212</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+
+        <!-- PENTING: Warna teks utama (untuk Menu Dropdown) -->
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColorSecondary">#BDBDBD</item>
+
+        <item name="colorSecondaryContainer">#332D00</item>
+        <item name="colorOnSecondaryContainer">#FFD54F</item>
     </style>
+
+    <style name="Theme.Navigation" parent="Base.Theme.Navigation" />
 </resources>

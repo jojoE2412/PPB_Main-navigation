@@ -1,62 +1,109 @@
 package com.example.navigation;
 
 import android.os.Bundle;
+import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MainFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.io.IOException;
+import java.util.List;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MainFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MainFragment newInstance(String param1, String param2) {
-        MainFragment fragment = new MainFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private RecyclerView recyclerView;
+    private NewApiService newApiService;
+    private final String API_KEY = "c0f9fc8e2fda44ef849184b268f424c2";
 
     public MainFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main, container, false);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        recyclerView = view.findViewById(R.id.recycler_view_news);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Animasi halus saat daftar muncul
+        recyclerView.setAlpha(0f);
+
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+            @NonNull
+            @Override
+            public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
+                Request newRequest  = chain.request().newBuilder()
+                        .addHeader("User-Agent", "PortalIDApp")
+                        .build();
+                return chain.proceed(newRequest);
+            }
+        }).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://newsapi.org/v2/")
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        newApiService = retrofit.create(NewApiService.class);
+
+        fetchNews(null, "indonesia");
+    }
+
+    public void fetchNews(String country, String query) {
+        Call<NewResponse> call;
+        if (query != null && !query.isEmpty()) {
+            call = newApiService.getSearchNews(query, API_KEY);
+        } else {
+            call = newApiService.getTopHeadlines(country, API_KEY);
+        }
+
+        call.enqueue(new Callback<NewResponse>() {
+            @Override
+            public void onResponse(Call<NewResponse> call, Response<NewResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<News> articles = response.body().getArticles();
+                    if (articles != null && !articles.isEmpty()) {
+                        NewsAdapter adapter = new NewsAdapter(articles, false);
+                        recyclerView.setAdapter(adapter);
+                        
+                        // Jalankan animasi fade-in
+                        recyclerView.animate().alpha(1f).setDuration(600).start();
+                    } else {
+                        Toast.makeText(getContext(), "Berita tidak ditemukan", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e("API_ERROR", "Code: " + response.code());
+                    Toast.makeText(getContext(), "Gagal memuat berita", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NewResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Koneksi Bermasalah", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
