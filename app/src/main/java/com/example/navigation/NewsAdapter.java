@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -111,9 +112,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     private void updateBookmarkIcon(ImageView icon, News news, Context context) {
         if (!isBookmarkPage) {
             if (BookmarkManager.isBookmarked(context, news)) {
+                icon.setColorFilter(ContextCompat.getColor(context, R.color.yellow_dark));
                 icon.setAlpha(1.0f);
             } else {
-                icon.setAlpha(0.3f);
+                icon.setColorFilter(ContextCompat.getColor(context, R.color.gray_text));
+                icon.setAlpha(0.5f);
             }
         }
     }

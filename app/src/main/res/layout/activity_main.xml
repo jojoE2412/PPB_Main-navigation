@@ -17,7 +17,9 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/yellow_primary"
             app:titleTextColor="@color/black"
-            android:theme="@style/ThemeOverlay.AppCompat.Light" />
+            app:navigationIconTint="@color/black"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"
+            app:popupTheme="@style/Theme.Material3.DayNight" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
